@@ -1,29 +1,23 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+  baseURL: API_BASE_URL,
 });
 
-let tokenGetter = null;
-
-export const setAuthTokenGetter = (getter) => {
-  tokenGetter = getter;
-};
-
-api.interceptors.request.use(async (config) => {
-  if (tokenGetter) {
+export const setAuthTokenGetter = (tokenGetter) => {
+  api.interceptors.request.use(async (config) => {
     try {
       const token = await tokenGetter();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-    } catch (err) {
-      console.error('Failed to get Clerk session token:', err);
+    } catch (error) {
+      console.error('Error fetching auth token:', error);
     }
-  }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+    return config;
+  });
+};
 
 export default api;
