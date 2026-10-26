@@ -37,24 +37,26 @@ export default function CalendarPage({ onSelectTask, refreshTrigger }) {
   };
 
   return (
-    <div className="bg-[#181C24] border border-[#282F3E] rounded-xl p-5">
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-white">Calendar</h2>
-        <p className="text-xs text-gray-400">View your work history by date</p>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Calendar</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">View your work history by date.</p>
       </div>
 
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        }}
-        events={events}
-        eventClick={handleEventClick}
-        height="75vh"
-      />
+      <div className="bg-white dark:bg-[#181C24] border border-gray-200 dark:border-[#282F3E] rounded-xl p-5 shadow-sm transition-colors">
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          }}
+          events={events}
+          eventClick={handleEventClick}
+          height="75vh"
+        />
+      </div>
     </div>
   );
 }
