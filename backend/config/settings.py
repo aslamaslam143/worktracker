@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-worktracker-prod-fallback-key')
+SECRET_KEY = os.getenv('SECRET_KEY', 'default-key')
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1')
 ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', '*').split(',') if host]
 
@@ -82,7 +82,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-# CORS & CSRF Settings
 CORS_ALLOWED_ORIGINS = [
     origin.strip() for origin in os.getenv(
         'CORS_ALLOWED_ORIGINS',
@@ -94,7 +93,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in os.getenv(
         'CSRF_TRUSTED_ORIGINS',
-        'https://worktrackerhumainbrainin.vercel.app,https://*.railway.app'
+        'https://worktrackerhumainbrainin.vercel.app,https://*.vercel.app'
     ).split(',') if origin
 ]
 
@@ -119,10 +118,5 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Clerk Authentication Settings
 CLERK_JWKS_URL = os.getenv('CLERK_JWKS_URL')
 CLERK_ISSUER = os.getenv('CLERK_ISSUER')
-
-# Google Sheets Integration
-GOOGLE_SHEET_ID = os.getenv('GOOGLE_SHEET_ID', '1zpeDvh3yqDbv6Iw9ox2r_BAJQQ9f_ybdF_gfYf2cFBk')
-GOOGLE_SERVICE_ACCOUNT_JSON = os.getenv('GOOGLE_SERVICE_ACCOUNT_JSON')

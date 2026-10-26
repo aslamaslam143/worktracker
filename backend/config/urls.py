@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from tasks.views import TaskViewSet, DashboardStatsView, CalendarEventsView
+from tasks.project_views import ProjectListCreateView
 from reports.views import MonthlyReportView, ExportCSVView, ExportExcelView
 from integrations.views import GoogleSheetsStatusView, GoogleSheetsSyncView
 
@@ -11,6 +12,8 @@ router.register(r'tasks', TaskViewSet, basename='task')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    # Projects
+    path('api/projects/', ProjectListCreateView.as_view(), name='project-list-create'),
     # Dashboard & Calendar
     path('api/dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
     path('api/calendar/events/', CalendarEventsView.as_view(), name='calendar-events'),
