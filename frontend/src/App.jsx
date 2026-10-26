@@ -176,17 +176,17 @@ export default function App() {
       </SignedOut>
 
       <SignedIn>
-        <div className="relative flex h-screen w-full bg-gray-50 dark:bg-[#0F1218] text-gray-900 dark:text-gray-200 overflow-hidden">
+        <div className="relative flex h-screen w-full bg-gray-50 dark:bg-[#0F1218] text-gray-900 dark:text-gray-200 overflow-hidden transition-colors duration-200">
           
-          {/* Mobile Overlay */}
+          {/* Mobile Overlay Backdrop */}
           {isMobileSidebarOpen && (
             <div
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
               onClick={() => setIsMobileSidebarOpen(false)}
             />
           )}
 
-          {/* Responsive Sidebar */}
+          {/* Sidebar */}
           <div
             className={`fixed inset-y-0 left-0 z-50 transform lg:static lg:translate-x-0 transition-transform duration-300 ease-in-out ${
               isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -202,7 +202,7 @@ export default function App() {
             />
           </div>
 
-          {/* Main Content Area */}
+          {/* Main Content Area without centering gap */}
           <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
             <TopNavbar
               onToggleSidebar={() => setIsMobileSidebarOpen((prev) => !prev)}
@@ -212,13 +212,58 @@ export default function App() {
               }}
             />
 
-            <main className="flex-1 overflow-y-auto px-3 py-4 sm:p-6 bg-gray-100/70 dark:bg-[#0F1218]">
-              <div className="max-w-7xl mx-auto w-full">
+            {/* Left gap neekkappatta full-width container */}
+            <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-100/70 dark:bg-[#0F1218] transition-colors duration-200">
+              <div className="w-full">
                 <Routes>
-                  <Route path="/" element={<Dashboard onOpenTask={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }} refreshTrigger={refreshTrigger} />} />
-                  <Route path="/tasks" element={<MyTasks onEditTask={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }} refreshTrigger={refreshTrigger} />} />
-                  <Route path="/projects/:projectName" element={<ProjectDetail onOpenTask={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }} refreshTrigger={refreshTrigger} />} />
-                  <Route path="/calendar" element={<CalendarPage onSelectTask={(t) => { setSelectedTask(t); setIsTaskModalOpen(true); }} refreshTrigger={refreshTrigger} />} />
+                  <Route
+                    path="/"
+                    element={
+                      <Dashboard
+                        onOpenTask={(t) => {
+                          setSelectedTask(t);
+                          setIsTaskModalOpen(true);
+                        }}
+                        refreshTrigger={refreshTrigger}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/tasks"
+                    element={
+                      <MyTasks
+                        onEditTask={(t) => {
+                          setSelectedTask(t);
+                          setIsTaskModalOpen(true);
+                        }}
+                        refreshTrigger={refreshTrigger}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/projects/:projectName"
+                    element={
+                      <ProjectDetail
+                        onOpenTask={(taskOrPrefill) => {
+                          setSelectedTask(taskOrPrefill);
+                          setIsTaskModalOpen(true);
+                        }}
+                        refreshTrigger={refreshTrigger}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/calendar"
+                    element={
+                      <CalendarPage
+                        onSelectTask={(t) => {
+                          setSelectedTask(t);
+                          setIsTaskModalOpen(true);
+                        }}
+                        refreshTrigger={refreshTrigger}
+                      />
+                    }
+                  />
                   <Route path="/reports" element={<MonthlyReports />} />
                   <Route path="/google-sheets" element={<GoogleSheetsPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
@@ -228,6 +273,7 @@ export default function App() {
           </div>
         </div>
 
+        {/* Task Modal Responsive Wrapper */}
         {isTaskModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
             <TaskModal
