@@ -1,3 +1,4 @@
+
 // import React, { useState, useEffect } from 'react';
 // import { NavLink, useNavigate } from 'react-router-dom';
 // import { UserButton, useUser } from '@clerk/clerk-react';
@@ -13,7 +14,6 @@
 // import api from '../../services/api';
 
 // const navItems = [
-
 //   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
 //   { name: 'My Tasks', path: '/tasks', icon: CheckSquare },
 //   { name: 'Calendar', path: '/calendar', icon: CalendarIcon },
@@ -23,7 +23,7 @@
 
 // const COLORS = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
 
-// export default function Sidebar({ onOpenAddTask }) {
+// export default function Sidebar({ onCloseMobile, onOpenAddTask }) {
 //   const { user } = useUser();
 //   const navigate = useNavigate();
 //   const [projects, setProjects] = useState([]);
@@ -74,19 +74,46 @@
 //     setIsModalOpen(false);
 //   };
 
+//   const handleNavClick = () => {
+//     if (onCloseMobile) {
+//       onCloseMobile();
+//     }
+//   };
+
+//   const handleProjectClick = (projectName) => {
+//     navigate(`/projects/${encodeURIComponent(projectName)}`);
+//     if (onCloseMobile) {
+//       onCloseMobile();
+//     }
+//   };
+
 //   return (
-//     <aside className="w-64 bg-white dark:bg-[#141822] border-r border-gray-200 dark:border-[#242A38] flex flex-col justify-between shrink-0 transition-colors duration-200">
+//     <aside className="w-64 h-full bg-white dark:bg-[#141822] border-r border-gray-200 dark:border-[#242A38] flex flex-col justify-between shrink-0 transition-colors duration-200 shadow-xl lg:shadow-none">
 //       <div>
-//         <div className="h-16 flex items-center px-6 gap-3 border-b border-gray-200 dark:border-[#242A38]">
-//           <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">
-//             W
+//         {/* Header with Title and Mobile Close (X) button */}
+//         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200 dark:border-[#242A38]">
+//           <div className="flex items-center gap-3">
+//             <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">
+//               W
+//             </div>
+//             <div>
+//               <h1 className="font-bold text-gray-900 dark:text-white text-base tracking-wide">WorkTracker</h1>
+//               <p className="text-[11px] text-gray-500 dark:text-gray-400">Track • Plan • Grow</p>
+//             </div>
 //           </div>
-//           <div>
-//             <h1 className="font-bold text-gray-900 dark:text-white text-base tracking-wide">WorkTracker</h1>
-//             <p className="text-[11px] text-gray-500 dark:text-gray-400">Track • Plan • Grow</p>
-//           </div>
+
+//           {/* Close button - visible only on Mobile */}
+//           <button
+//             type="button"
+//             onClick={onCloseMobile}
+//             className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-white lg:hidden cursor-pointer"
+//             aria-label="Close sidebar"
+//           >
+//             <X size={20} />
+//           </button>
 //         </div>
 
+//         {/* Navigation items */}
 //         <nav className="p-4 space-y-1.5">
 //           {navItems.map((item) => {
 //             const Icon = item.icon;
@@ -94,6 +121,7 @@
 //               <NavLink
 //                 key={item.path}
 //                 to={item.path}
+//                 onClick={handleNavClick}
 //                 className={({ isActive }) =>
 //                   `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
 //                     isActive
@@ -109,8 +137,8 @@
 //           })}
 //         </nav>
 
-//         {/* Projects section with add button */}
-//         <div className="px-5 mt-6">
+//         {/* Projects section */}
+//         <div className="px-5 mt-4 sm:mt-6">
 //           <div className="flex items-center justify-between text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
 //             <span>Projects</span>
 //             <button
@@ -122,11 +150,11 @@
 //             </button>
 //           </div>
 
-//           <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 max-h-48 overflow-y-auto">
+//           <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 max-h-40 sm:max-h-48 overflow-y-auto">
 //             {projects.map((proj, idx) => (
 //               <div
 //                 key={proj.id || idx}
-//                 onClick={() => navigate(`/projects/${encodeURIComponent(proj.name)}`)}
+//                 onClick={() => handleProjectClick(proj.name)}
 //                 className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-[#1C2230] cursor-pointer transition-colors"
 //               >
 //                 <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${proj.color || 'bg-blue-500'}`}></span>
@@ -137,8 +165,9 @@
 //         </div>
 //       </div>
 
+//       {/* User info footer */}
 //       <div className="p-4 border-t border-gray-200 dark:border-[#242A38] flex items-center justify-between">
-//         <div className="flex items-center gap-3">
+//         <div className="flex items-center gap-3 overflow-hidden">
 //           <UserButton afterSignOutUrl="/sign-in" />
 //           <div className="overflow-hidden">
 //             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user?.fullName || user?.firstName || 'User'}</p>
@@ -207,9 +236,11 @@
 //     </aside>
 //   );
 // }
+
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { UserButton, useUser } from '@clerk/clerk-react';
+import { UserButton, useUser, useAuth } from '@clerk/clerk-react';
 import { 
   LayoutDashboard, 
   CheckSquare, 
@@ -233,6 +264,7 @@ const COLORS = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500'
 
 export default function Sidebar({ onCloseMobile, onOpenAddTask }) {
   const { user } = useUser();
+  const { isLoaded, isSignedIn } = useAuth(); // <-- Clerk Auth Status
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -240,8 +272,11 @@ export default function Sidebar({ onCloseMobile, onOpenAddTask }) {
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    // Auth fully load aagi sign in aana piragu mattum fetch pannanum
+    if (isLoaded && isSignedIn) {
+      fetchProjects();
+    }
+  }, [isLoaded, isSignedIn]);
 
   const fetchProjects = async () => {
     try {
