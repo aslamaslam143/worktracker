@@ -1,7 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, CheckCircle2, Clock, Hourglass, Trash2, Edit2, ArrowLeft } from 'lucide-react';
+import { Plus, CheckCircle2, Clock, Trash2, Edit2, ArrowLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../services/api';
+import ConfirmModal from '../components/common/ConfirmModal';
 
 export default function ProjectDetail({ onOpenTask, refreshTrigger }) {
   const { projectName } = useParams();
@@ -11,6 +14,11 @@ export default function ProjectDetail({ onOpenTask, refreshTrigger }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
+
+  // Delete modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchProjectTasks();
@@ -34,20 +42,33 @@ export default function ProjectDetail({ onOpenTask, refreshTrigger }) {
   const handleQuickStatusChange = async (taskId, newStatus) => {
     try {
       await api.patch(`/tasks/${taskId}/`, { status: newStatus });
+      toast.success('Status updated successfully');
       fetchProjectTasks();
     } catch (err) {
       console.error('Status update failed:', err);
+      toast.error('Failed to update status');
     }
   };
 
-  const handleDeleteTask = async (taskId) => {
-    if (window.confirm('Intha task-ai delete seiyya virumbugireergala?')) {
-      try {
-        await api.delete(`/tasks/${taskId}/`);
-        fetchProjectTasks();
-      } catch (err) {
-        console.error('Delete failed:', err);
-      }
+  const handleOpenDelete = (task) => {
+    setTaskToDelete(task);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) return;
+    try {
+      setDeleteLoading(true);
+      await api.delete(`/tasks/${taskToDelete.id}/`);
+      toast.success('Task deleted successfully');
+      setDeleteModalOpen(false);
+      setTaskToDelete(null);
+      fetchProjectTasks();
+    } catch (err) {
+      console.error('Delete failed:', err);
+      toast.error('Failed to delete task');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -55,17 +76,17 @@ export default function ProjectDetail({ onOpenTask, refreshTrigger }) {
   const totalTasks = tasks.length;
   const completedCount = tasks.filter((t) => t.status === 'Completed').length;
   const inProgressCount = tasks.filter((t) => t.status === 'In Progress').length;
-  const pendingCount = tasks.filter((t) => t.status === 'Pending' || t.status === 'Yet to Start').length;
   const totalHours = tasks.reduce((acc, t) => acc + (parseFloat(t.hours_worked) || 0), 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {/* Top Navigation & Project Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 dark:border-[#282F3E] pb-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-lg bg-white dark:bg-[#1C2230] border border-gray-200 dark:border-[#2B3446] text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition"
+            className="p-2 rounded-lg bg-white dark:bg-[#1C2230] border border-gray-200 dark:border-[#2B3446] text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition cursor-pointer"
+            aria-label="Back"
           >
             <ArrowLeft size={16} />
           </button>
@@ -133,7 +154,7 @@ export default function ProjectDetail({ onOpenTask, refreshTrigger }) {
 
       {/* Tasks List */}
       {loading ? (
-        <div className="py-12 text-center text-gray-500">Tasks load aagukirathu...</div>
+        <div className="py-12 text-center text-gray-500 text-xs">Loading tasks...</div>
       ) : tasks.length === 0 ? (
         <div className="text-center py-12 bg-white dark:bg-[#181C24] rounded-xl border border-gray-200 dark:border-[#282F3E]">
           <p className="text-gray-500 dark:text-gray-400 text-sm">No tasks in this project yet.</p>
@@ -141,7 +162,8 @@ export default function ProjectDetail({ onOpenTask, refreshTrigger }) {
             onClick={() => onOpenTask({ project_name: decodedProjectName })}
             className="mt-3 text-blue-600 dark:text-blue-400 text-xs font-semibold hover:underline cursor-pointer"
           >
-+ Create First Task          </button>
+            + Create First Task
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -162,7 +184,7 @@ export default function ProjectDetail({ onOpenTask, refreshTrigger }) {
                       <Edit2 size={14} />
                     </button>
                     <button
-                      onClick={() => handleDeleteTask(task.id)}
+                      onClick={() => handleOpenDelete(task)}
                       className="text-gray-400 hover:text-red-500 cursor-pointer"
                       title="Delete Task"
                     >
@@ -183,7 +205,10 @@ export default function ProjectDetail({ onOpenTask, refreshTrigger }) {
               </div>
 
               <div className="mt-4 pt-3 border-t border-gray-100 dark:border-[#242A38] flex items-center justify-between text-xs">
-                <span className="text-gray-500 dark:text-gray-400">{task.work_date} • {task.hours_worked} hrs</span>
+                <span className="text-gray-500 dark:text-gray-400">
+                  {task.work_date} • {task.hours_worked || '0.00'} hrs
+                </span>
+                
                 {/* Instant Status Selector */}
                 <select
                   value={task.status}
@@ -207,6 +232,21 @@ export default function ProjectDetail({ onOpenTask, refreshTrigger }) {
           ))}
         </div>
       )}
+
+      {/* Dark Confirmation Modal matching MyTasks */}
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        title="Delete task?"
+        description={`This will permanently delete "${taskToDelete?.title || 'this task'}". This action cannot be undone.`}
+        confirmText="Delete task"
+        cancelText="Cancel"
+        loading={deleteLoading}
+        onConfirm={handleConfirmDelete}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setTaskToDelete(null);
+        }}
+      />
     </div>
   );
 }
